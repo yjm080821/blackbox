@@ -1,0 +1,25 @@
+.Header {
+    width: 100vw;
+    height: 5vw;
+    background-color: orange;
+    border-bottom: 1vw solid black;
+}
+
+.logo {
+    height: 5vw;
+}
+
+.M {
+    display: flex;
+    justify-content: space-between;
+}
+
+.PC {
+    justify-content: space-between;
+}
+
+.change {
+    background-color: orange;
+    border: 0;
+    font-weight: 700;
+}
