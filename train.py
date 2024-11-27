@@ -52,8 +52,8 @@ val_dataset_raw = datasets.ImageFolder(root='./data/validation_data')
 train_dataset = SafeImageDataset(train_dataset_raw, transform=train_transform)
 val_dataset = SafeImageDataset(val_dataset_raw, transform=val_transform)
 
-train_loader = DataLoader(train_dataset, batch_size=16, shuffle=True, drop_last=True)
-val_loader = DataLoader(val_dataset, batch_size=16, shuffle=False, drop_last=True)
+train_loader = DataLoader(train_dataset, batch_size=64, shuffle=True, drop_last=True)
+val_loader = DataLoader(val_dataset, batch_size=64, shuffle=False, drop_last=True)
 
 # ----------3. 모델 정의----------
 model = timm.create_model('inception_resnet_v2', pretrained=True)
@@ -72,14 +72,14 @@ model = model.to(device)
 print(device)
 
 criterion = nn.BCEWithLogitsLoss()
-optimizer = optim.Adam(model.parameters(), lr=0.000001, weight_decay=1e-3)
+optimizer = optim.Adam(model.parameters(), lr=0.00001, weight_decay=1e-3)
 
 from torch.optim.lr_scheduler import CosineAnnealingLR
 scheduler = CosineAnnealingLR(optimizer, T_max=10)  # T_max는 주기(epoch)
 
 # ----------5. Early Stopping----------
 class EarlyStopping:
-    def __init__(self, patience=5, delta=0.0001):
+    def __init__(self, patience=10, delta=0.0001):
         self.patience = patience
         self.delta = delta
         self.best_loss = float('inf')
@@ -96,7 +96,7 @@ class EarlyStopping:
 early_stopping = EarlyStopping()
 
 # ----------6. 학습 루프----------
-def train_model(model, train_loader, val_loader, criterion, optimizer, scheduler, early_stopping, num_epochs=20):
+def train_model(model, train_loader, val_loader, criterion, optimizer, scheduler, early_stopping, num_epochs=50):
     train_losses, val_losses, val_accuracies = [], [], []
 
     for epoch in range(num_epochs):
