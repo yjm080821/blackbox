@@ -46,7 +46,6 @@ class SafeImageDataset(Dataset):
             print(f"Skipping corrupted image at index {idx}: {e}")
             return self.__getitem__((idx + 1) % len(self))  # 다음 샘플로 대체
 
-# 데이터셋 로드
 train_dataset_raw = datasets.ImageFolder(root='./data/training_data')
 val_dataset_raw = datasets.ImageFolder(root='./data/validation_data')
 
@@ -63,19 +62,20 @@ model = timm.create_model('inception_resnet_v2', pretrained=True)
 model.classif = nn.Sequential(
     nn.Linear(model.classif.in_features, 512),
     nn.ReLU(),
-    nn.Dropout(0.5),
+    nn.Dropout(0.5),  # Dropout 추가
     nn.Linear(512, 1)
 )
 
 # ----------4. 학습 설정----------
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model = model.to(device)
+print(device)
 
 criterion = nn.BCEWithLogitsLoss()
-optimizer = optim.Adam(model.parameters(), lr=0.00001, weight_decay=1e-3)
+optimizer = optim.Adam(model.parameters(), lr=0.000001, weight_decay=1e-3)
 
-from torch.optim.lr_scheduler import ReduceLROnPlateau
-scheduler = ReduceLROnPlateau(optimizer, mode='min', factor=0.3, patience=2)
+from torch.optim.lr_scheduler import CosineAnnealingLR
+scheduler = CosineAnnealingLR(optimizer, T_max=10)  # T_max는 주기(epoch)
 
 # ----------5. Early Stopping----------
 class EarlyStopping:
@@ -137,7 +137,7 @@ def train_model(model, train_loader, val_loader, criterion, optimizer, scheduler
               f"Val Loss: {val_loss / len(val_loader):.4f}, "
               f"Val Accuracy: {correct / total:.4f}")
 
-        scheduler.step(val_loss)
+        scheduler.step()
         if early_stopping(val_loss / len(val_loader)):
             print("Early stopping triggered.")
             break
